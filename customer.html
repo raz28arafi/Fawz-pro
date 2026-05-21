@@ -537,10 +537,34 @@
     try {
       const { data, error } = await window._supabase
         .from('customers')
-        .select('*')
+        .select('*, customer_securities(*)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      allCustomers = (data || []).map(mapCustomerRow);
+      allCustomers = (data || []).map(r => {
+        const mapped = mapCustomerRow(r);
+        // Attach securities data from join
+        const sec = r.customer_securities && r.customer_securities[0];
+        if (sec) {
+          mapped.rdnBankName = sec.rdn_bank_name || '';
+          mapped.rdnAccountNo = sec.rdn_account_no || '';
+          mapped.bankAccountID = sec.personal_bank_name || '';
+          mapped.bankAccountNo = sec.personal_account_no || '';
+          mapped.bankAccountName = sec.personal_account_name || '';
+          mapped.savingsBankName = sec.rdn_bank_name || '';
+          mapped.savingsID = sec.rdn_account_no || '';
+          mapped.savingsBankID = sec.rdn_bank_name || '';
+        }
+        mapped.securities = (r.customer_securities || []).map(s => ({
+          sekuritasName: s.sekuritas_name || 'Maybank',
+          rdnBankName: s.rdn_bank_name || '',
+          rdnAccountNo: s.rdn_account_no || '',
+          kseiSingleID: s.sid || '',
+          personalBankName: s.personal_bank_name || '',
+          personalAccountNo: s.personal_account_no || '',
+          personalAccountName: s.personal_account_name || '',
+        }));
+        return mapped;
+      });
       applyFilters(); updateStats(); populateFilters();
       showToast('Data berhasil dimuat', 'success');
     } catch (e) {
@@ -1313,16 +1337,16 @@
           const secRow = {
             customer_id: inserted.id,
             sekuritas_name: 'Maybank',
-            rdn_bank_name: row.bankAccountID || null,
-            rdn_account_no: row.bankAccountNo || null,
+            rdn_bank_name: row.savingsBankID || null,
+            rdn_account_no: row.savingsID || null,
             sec_client_id: row.clientID || null,
             sid: row.kseiSingleID || null,
-            personal_bank_name: row.savingsBankName || row.bankAccountID || null,
-            personal_account_no: row.savingsID || row.bankAccountNo || null,
-            personal_account_name: row.bankAccountName || row.clientName || null,
+            personal_bank_name: row.bankAccountID || null,
+            personal_account_no: row.bankAccountNo || null,
+            personal_account_name: row.bankAccountName || null,
           };
           // Only insert if there's meaningful data
-          if (secRow.rdn_bank_name || secRow.rdn_account_no || secRow.sid) {
+          if (secRow.rdn_bank_name || secRow.rdn_account_no || secRow.personal_bank_name || secRow.personal_account_no) {
             await window._supabase.from('customer_securities').insert(secRow);
           }
 
