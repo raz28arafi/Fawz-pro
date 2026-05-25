@@ -324,12 +324,13 @@
 
   async function loadCustomers() {
     try {
-      const { data, error } = await supabase.from('customers').select('client_id, client_name, sales_person_name').order('client_name');
-      if (!error && data) {
+      const { data, error } = await supabase.from('customers').select('*').order('client_name');
+      if (error) { console.warn('Load customers error:', error); return; }
+      if (data) {
         customers = data;
         const sel = document.getElementById('fClientId');
         sel.innerHTML = '<option value="">-- Pilih Nasabah --</option>' +
-          data.map(c => `<option value="${c.client_id}">${c.client_id} — ${c.client_name}</option>`).join('');
+          data.map(c => `<option value="${c.client_id}">${c.client_id} — ${c.client_name || ''}</option>`).join('');
       }
     } catch(e) { console.warn('Load customers:', e); }
   }
@@ -704,8 +705,8 @@
     }
     const c = customers.find(x => x.client_id === clientId);
     if (c) {
-      document.getElementById('fClientName').value = c.client_name;
-      document.getElementById('fSalesName').value = c.sales_person_name || '';
+      document.getElementById('fClientName').value = c.client_name || '';
+      document.getElementById('fSalesName').value = c.sales_person_name || c.sales_name || c.sales || '';
     }
   }
 
