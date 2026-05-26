@@ -1007,6 +1007,7 @@
     // Parse each row and expand into individual transactions per day
     csvRows = [];
     var clientCount = 0;
+    console.log('CSV Parse - Type:', uploadType, 'Month:', uploadMonth, 'dayStartIdx:', dayStartIdx);
 
     for (let i = 1; i < lines.length; i++) {
       // Handle quoted values with commas inside (e.g. "7,101")
@@ -1060,7 +1061,8 @@
     document.getElementById('csvClientCount').textContent = clientCount;
     const previewBody = document.getElementById('csvPreviewBody');
     const valField = uploadType === 'volume' ? 'volume' : 'fee';
-    previewBody.innerHTML = csvRows.slice(0, 15).map(r =>
+    previewBody.innerHTML = '<tr><td colspan="5" style="background:#fffbf3;font-weight:600;color:var(--navy);text-align:center;">Tipe: ' + uploadType.toUpperCase() + ' | Bulan: ' + uploadMonth + '</td></tr>' +
+      csvRows.slice(0, 15).map(r =>
       `<tr><td>${r.tanggal}</td><td>${r.client_id}</td><td>${r.client_name}</td><td>${formatRp(r[valField])}</td><td>${r.sales_name}</td></tr>`
     ).join('') + (csvRows.length > 15 ? `<tr><td colspan="5" style="text-align:center;color:#888;">... dan ${csvRows.length - 15} transaksi lainnya</td></tr>` : '');
 
