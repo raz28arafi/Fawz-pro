@@ -326,30 +326,35 @@
       <div class="modal-title">Upload CSV Transaksi Saham</div>
       <button class="modal-close" onclick="closeUploadModal()">✕</button>
     </div>
-    <div class="form-group full" style="margin-bottom:16px;">
-      <label class="form-label">Tipe Upload</label>
-      <div class="type-selector">
-        <label><input type="radio" name="uploadType" value="volume" checked onchange="onUploadTypeChange()"/> Upload Volume</label>
-        <label><input type="radio" name="uploadType" value="fee" onchange="onUploadTypeChange()"/> Upload Fee</label>
+    <div class="form-grid" style="margin-bottom:16px;">
+      <div class="form-group">
+        <label class="form-label">Tipe Upload</label>
+        <div class="type-selector">
+          <label><input type="radio" name="uploadType" value="volume" checked/> Volume</label>
+          <label><input type="radio" name="uploadType" value="fee"/> Fee</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bulan & Tahun</label>
+        <input class="form-input" type="month" id="uploadMonth"/>
       </div>
     </div>
     <div style="margin-bottom:16px;">
-      <p id="csvFormatHint" style="font-size:0.82rem;color:var(--gray);line-height:1.6;">
-        Format CSV:<br>
-        <strong>tanggal,client_id,client_name,volume,sales_name</strong><br>
-        Contoh: <code>2026-05-25,RW028N,ROOS WE,100000000,ZURAINA</code>
+      <p style="font-size:0.82rem;color:var(--gray);line-height:1.6;">
+        Format CSV (format kalender):<br>
+        <strong>NO,CLIENT CODE,NAMA CUSTOMER,SALES CODE,1,2,3,...,31,TOTAL</strong><br>
+        Nilai per tanggal di kolom 1-31. Kosong = tidak ada transaksi.
       </p>
     </div>
     <div style="border:2px dashed var(--border);border-radius:14px;padding:36px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fafafa;" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()">
-      <div style="font-size:2.5rem;margin-bottom:10px;"></div>
       <div style="font-weight:600;color:var(--navy);">Klik atau drag & drop file CSV</div>
-      <div style="font-size:0.8rem;color:var(--gray);margin-top:6px;" id="csvDropHint">Format: tanggal, client_id, client_name, volume, sales_name</div>
+      <div style="font-size:0.8rem;color:var(--gray);margin-top:6px;">Format kalender: NO, CLIENT CODE, NAMA CUSTOMER, SALES CODE, 1-31, TOTAL</div>
     </div>
     <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVFile(this.files[0])"/>
     <div id="csvPreviewWrap" style="display:none;margin-top:16px;">
-      <div style="font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:8px;">Preview (<span id="csvRowCount">0</span> baris):</div>
+      <div style="font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:8px;">Preview (<span id="csvRowCount">0</span> transaksi dari <span id="csvClientCount">0</span> nasabah):</div>
       <div style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;overflow-x:auto;">
-        <table style="font-size:0.75rem;"><thead id="csvPreviewHead"><tr><th>Tanggal</th><th>Client ID</th><th>Nama</th><th>Volume</th><th>Sales</th></tr></thead><tbody id="csvPreviewBody"></tbody></table>
+        <table style="font-size:0.75rem;"><thead><tr><th>Tanggal</th><th>Client ID</th><th>Nama</th><th>Nilai</th><th>Sales</th></tr></thead><tbody id="csvPreviewBody"></tbody></table>
       </div>
     </div>
     <div id="uploadStatus" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:0.82rem;"></div>
@@ -557,29 +562,6 @@
       document.getElementById('fFeeGroup').style.display = '';
       document.getElementById('fVolume').value = '';
     }
-  }
-
-  // Upload type selector logic
-  function onUploadTypeChange() {
-    var type = document.querySelector('input[name="uploadType"]:checked').value;
-    var hint = document.getElementById('csvFormatHint');
-    var dropHint = document.getElementById('csvDropHint');
-    var previewHead = document.getElementById('csvPreviewHead');
-    if (type === 'volume') {
-      hint.innerHTML = 'Format CSV:<br><strong>tanggal,client_id,client_name,volume,sales_name</strong><br>Contoh: <code>2026-05-25,RW028N,ROOS WE,100000000,ZURAINA</code>';
-      dropHint.textContent = 'Format: tanggal, client_id, client_name, volume, sales_name';
-      previewHead.innerHTML = '<tr><th>Tanggal</th><th>Client ID</th><th>Nama</th><th>Volume</th><th>Sales</th></tr>';
-    } else {
-      hint.innerHTML = 'Format CSV:<br><strong>tanggal,client_id,client_name,fee,sales_name</strong><br>Contoh: <code>2026-05-25,RW028N,ROOS WE,20000,ZURAINA</code>';
-      dropHint.textContent = 'Format: tanggal, client_id, client_name, fee, sales_name';
-      previewHead.innerHTML = '<tr><th>Tanggal</th><th>Client ID</th><th>Nama</th><th>Fee</th><th>Sales</th></tr>';
-    }
-    // Reset preview when type changes
-    csvRows = [];
-    document.getElementById('csvFileInput').value = '';
-    document.getElementById('csvPreviewWrap').style.display = 'none';
-    document.getElementById('csvPreviewBody').innerHTML = '';
-    document.getElementById('btnUpload').disabled = true;
   }
 
   function openAddModal() {
@@ -917,9 +899,10 @@
     document.getElementById('csvPreviewBody').innerHTML = '';
     document.getElementById('uploadStatus').style.display = 'none';
     document.getElementById('btnUpload').disabled = true;
-    // Reset to volume type
     document.querySelector('input[name="uploadType"][value="volume"]').checked = true;
-    onUploadTypeChange();
+    // Default upload month to current month
+    var now = new Date();
+    document.getElementById('uploadMonth').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
     document.getElementById('uploadModal').classList.add('open');
   }
 
@@ -936,57 +919,120 @@
 
   function parseCSV(text) {
     const uploadType = document.querySelector('input[name="uploadType"]:checked').value;
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length < 2) { showToast('File CSV kosong atau tidak valid', 'error'); return; }
+    const uploadMonth = document.getElementById('uploadMonth').value;
 
-    // Parse header
-    const header = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
-
-    // Map header to expected fields
-    const colMap = {};
-    header.forEach((h, i) => {
-      if (h.includes('tanggal') || h.includes('date')) colMap.tanggal = i;
-      else if (h.includes('client_id') || h.includes('client code') || h.includes('clientid') || h.includes('kode')) colMap.client_id = i;
-      else if (h.includes('client_name') || h.includes('nama') || h.includes('customer')) colMap.client_name = i;
-      else if (h.includes('volume') || h.includes('amount')) colMap.value = i;
-      else if (h.includes('fee')) colMap.value = i;
-      else if (h.includes('sales')) colMap.sales_name = i;
-    });
-
-    // If no explicit value column found, try 4th column (index 3)
-    if (colMap.value === undefined && header.length >= 4) colMap.value = 3;
-
-    if (colMap.tanggal === undefined || colMap.client_id === undefined) {
-      showToast('Header CSV harus mengandung kolom tanggal dan client_id', 'error');
+    if (!uploadMonth) {
+      showToast('Pilih bulan & tahun terlebih dahulu', 'error');
       return;
     }
 
-    // Parse rows
+    const [year, month] = uploadMonth.split('-').map(Number);
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) { showToast('File CSV kosong atau tidak valid', 'error'); return; }
+
+    // Parse header to find column positions
+    // Expected: NO, CLIENT CODE, NAMA CUSTOMER, SALES CODE, 1, 2, 3, ..., 31, TOTAL
+    const header = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+
+    // Find the index where day columns start (first column that is a number 1-31)
+    let dayStartIdx = -1;
+    let clientCodeIdx = -1;
+    let clientNameIdx = -1;
+    let salesCodeIdx = -1;
+
+    for (let i = 0; i < header.length; i++) {
+      const h = header[i].toLowerCase().trim();
+      if (h === 'client code' || h === 'client_code' || h === 'clientid' || h === 'client_id') clientCodeIdx = i;
+      else if (h === 'nama customer' || h === 'nama_customer' || h === 'client_name' || h.includes('nama')) clientNameIdx = i;
+      else if (h === 'sales code' || h === 'sales_code' || h.includes('sales')) salesCodeIdx = i;
+      else if (h === '1' && dayStartIdx === -1) dayStartIdx = i;
+    }
+
+    if (clientCodeIdx === -1) { showToast('Kolom CLIENT CODE tidak ditemukan di header', 'error'); return; }
+    if (dayStartIdx === -1) { showToast('Kolom tanggal (1,2,3...) tidak ditemukan di header', 'error'); return; }
+
+    // Parse each row and expand into individual transactions per day
     csvRows = [];
+    var clientCount = 0;
+
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
-      const val = parseFloat(cols[colMap.value]) || 0;
-      const row = {
-        tanggal: cols[colMap.tanggal] || '',
-        client_id: cols[colMap.client_id] || '',
-        client_name: cols[colMap.client_name] || '',
-        volume: uploadType === 'volume' ? val : 0,
-        fee: uploadType === 'fee' ? val : 0,
-        sales_name: cols[colMap.sales_name] || ''
-      };
-      if (row.tanggal && row.client_id) csvRows.push(row);
+      // Handle quoted values with commas inside (e.g. "7,101")
+      const cols = parseCSVLine(lines[i]);
+      if (!cols || cols.length < dayStartIdx + 1) continue;
+
+      const clientId = (cols[clientCodeIdx] || '').trim();
+      const clientName = clientNameIdx >= 0 ? (cols[clientNameIdx] || '').trim() : '';
+      const salesName = salesCodeIdx >= 0 ? (cols[salesCodeIdx] || '').trim() : '';
+
+      // Skip empty rows, total rows, or rows without client_id
+      if (!clientId || clientId.toLowerCase() === 'total fee' || clientId.toLowerCase() === 'total transaksi') continue;
+
+      let hasData = false;
+
+      // Iterate through day columns (1-31)
+      for (let day = 1; day <= 31; day++) {
+        const colIdx = dayStartIdx + (day - 1);
+        if (colIdx >= cols.length) break;
+
+        let rawVal = (cols[colIdx] || '').trim();
+        // Remove quotes, spaces, and handle formatted numbers like "7,101" or "  7,101 "
+        rawVal = rawVal.replace(/['"]/g, '').replace(/\s/g, '').replace(/,/g, '');
+        if (rawVal === '' || rawVal === '-' || rawVal === '0') continue;
+
+        const val = parseFloat(rawVal);
+        if (!val || val <= 0) continue;
+
+        // Check if this day is valid for the month
+        const daysInMonth = new Date(year, month, 0).getDate();
+        if (day > daysInMonth) continue;
+
+        const tanggal = year + '-' + String(month).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+
+        csvRows.push({
+          tanggal: tanggal,
+          client_id: clientId,
+          client_name: clientName,
+          volume: uploadType === 'volume' ? val : 0,
+          fee: uploadType === 'fee' ? val : 0,
+          sales_name: salesName
+        });
+        hasData = true;
+      }
+
+      if (hasData) clientCount++;
     }
 
     // Show preview
     document.getElementById('csvRowCount').textContent = csvRows.length;
+    document.getElementById('csvClientCount').textContent = clientCount;
     const previewBody = document.getElementById('csvPreviewBody');
-    const valLabel = uploadType === 'volume' ? 'volume' : 'fee';
-    previewBody.innerHTML = csvRows.slice(0, 10).map(r =>
-      `<tr><td>${r.tanggal}</td><td>${r.client_id}</td><td>${r.client_name}</td><td>${formatRp(r[valLabel])}</td><td>${r.sales_name}</td></tr>`
-    ).join('') + (csvRows.length > 10 ? `<tr><td colspan="5" style="text-align:center;color:#888;">... dan ${csvRows.length - 10} baris lainnya</td></tr>` : '');
+    const valField = uploadType === 'volume' ? 'volume' : 'fee';
+    previewBody.innerHTML = csvRows.slice(0, 15).map(r =>
+      `<tr><td>${r.tanggal}</td><td>${r.client_id}</td><td>${r.client_name}</td><td>${formatRp(r[valField])}</td><td>${r.sales_name}</td></tr>`
+    ).join('') + (csvRows.length > 15 ? `<tr><td colspan="5" style="text-align:center;color:#888;">... dan ${csvRows.length - 15} transaksi lainnya</td></tr>` : '');
 
     document.getElementById('csvPreviewWrap').style.display = 'block';
     document.getElementById('btnUpload').disabled = csvRows.length === 0;
+  }
+
+  // Parse a CSV line handling quoted fields with commas
+  function parseCSVLine(line) {
+    var result = [];
+    var current = '';
+    var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+      } else if (ch === ',' && !inQuotes) {
+        result.push(current);
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+    result.push(current);
+    return result;
   }
 
   async function uploadCSVData() {
