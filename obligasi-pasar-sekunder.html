@@ -205,11 +205,12 @@
       <div class="table-wrap">
         <table class="obligasi-gov-idr">
           <thead><tr>
-            <th>Seri</th><th>Kupon (%)</th><th>Jatuh Tempo</th>
-            <th>Harga Jual</th><th>Harga Beli</th><th>Yield (%)</th>
-            <th>Tgl. Update</th><th>Aksi</th>
+            <th>Series</th><th>Jatuh Tempo</th><th>Coupon (%)</th>
+            <th>Last Coupon</th><th>Next Coupon</th>
+            <th>Bid</th><th>Offer</th><th>YTM (%)</th>
+            <th>Due Date</th><th>Tgl. Update</th><th>Aksi</th>
           </tr></thead>
-          <tbody id="tbody-gov-idr"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
+          <tbody id="tbody-gov-idr"><tr><td colspan="11"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
         </table>
       </div>
       <div class="table-footer">
@@ -241,11 +242,12 @@
       <div class="table-wrap">
         <table class="obligasi-gov-usd">
           <thead><tr>
-            <th>Seri</th><th>Kupon (%)</th><th>Jatuh Tempo</th>
-            <th>Harga Jual</th><th>Harga Beli</th><th>Yield (%)</th>
-            <th>Tgl. Update</th><th>Aksi</th>
+            <th>Series</th><th>Jatuh Tempo</th><th>Coupon (%)</th>
+            <th>Last Coupon</th><th>Next Coupon</th>
+            <th>Bid</th><th>Offer</th><th>YTM (%)</th>
+            <th>Due Date</th><th>Tgl. Update</th><th>Aksi</th>
           </tr></thead>
-          <tbody id="tbody-gov-usd"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
+          <tbody id="tbody-gov-usd"><tr><td colspan="11"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
         </table>
       </div>
       <div class="table-footer">
@@ -277,11 +279,12 @@
       <div class="table-wrap">
         <table class="obligasi-korp-idr">
           <thead><tr>
-            <th>Seri</th><th>Kupon (%)</th><th>Jatuh Tempo</th>
-            <th>Harga Jual</th><th>Harga Beli</th><th>Yield (%)</th>
-            <th>Tgl. Update</th><th>Aksi</th>
+            <th>Series</th><th>Jatuh Tempo</th><th>Rating</th><th>Coupon (%)</th>
+            <th>Last Coupon</th><th>Next Coupon</th>
+            <th>Bid</th><th>Offer</th><th>YTM (%)</th>
+            <th>Due Date</th><th>Tgl. Update</th><th>Aksi</th>
           </tr></thead>
-          <tbody id="tbody-korp-idr"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
+          <tbody id="tbody-korp-idr"><tr><td colspan="12"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
         </table>
       </div>
       <div class="table-footer">
@@ -313,11 +316,12 @@
       <div class="table-wrap">
         <table class="obligasi-korp-usd">
           <thead><tr>
-            <th>Seri</th><th>Kupon (%)</th><th>Jatuh Tempo</th>
-            <th>Harga Jual</th><th>Harga Beli</th><th>Yield (%)</th>
-            <th>Tgl. Update</th><th>Aksi</th>
+            <th>Series</th><th>Jatuh Tempo</th><th>Rating</th><th>Coupon (%)</th>
+            <th>Last Coupon</th><th>Next Coupon</th>
+            <th>Bid</th><th>Offer</th><th>YTM (%)</th>
+            <th>Due Date</th><th>Tgl. Update</th><th>Aksi</th>
           </tr></thead>
-          <tbody id="tbody-korp-usd"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
+          <tbody id="tbody-korp-usd"><tr><td colspan="12"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
         </table>
       </div>
       <div class="table-footer">
@@ -350,28 +354,44 @@
 
     <div class="form-grid">
       <div class="form-group full">
-        <label class="form-label">Seri <span class="req">*</span></label>
+        <label class="form-label">Series <span class="req">*</span></label>
         <input class="form-input" id="fSeri" placeholder="Contoh: FR0100, INDO30, PPLN03CN3"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Kupon (%)</label>
-        <input class="form-input" id="fKupon" type="number" step="0.001" placeholder="6.375"/>
       </div>
       <div class="form-group">
         <label class="form-label">Jatuh Tempo</label>
         <input class="form-input" id="fJatuhTempo" type="date"/>
       </div>
+      <div class="form-group" id="fRatingGroup">
+        <label class="form-label">Rating <span style="font-size:0.65rem;color:#888;">(Korporasi)</span></label>
+        <input class="form-input" id="fRating" placeholder="AAA, AA+, A, BBB+"/>
+      </div>
       <div class="form-group">
-        <label class="form-label">Harga Jual</label>
+        <label class="form-label">Coupon (%)</label>
+        <input class="form-input" id="fKupon" type="number" step="0.001" placeholder="6.375"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Coupon Date</label>
+        <input class="form-input" id="fLastCoupon" type="date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Next Coupon Date</label>
+        <input class="form-input" id="fNextCoupon" type="date"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bid (Harga Jual)</label>
         <input class="form-input" id="fHargaJual" type="number" step="0.0001" placeholder="101.50"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Harga Beli</label>
+        <label class="form-label">Offer (Harga Beli)</label>
         <input class="form-input" id="fHargaBeli" type="number" step="0.0001" placeholder="100.75"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Yield (%)</label>
+        <label class="form-label">YTM (%)</label>
         <input class="form-input" id="fYield" type="number" step="0.0001" placeholder="6.82"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input class="form-input" id="fDueDate" type="date"/>
       </div>
       <div class="form-group">
         <label class="form-label">Tanggal Update</label>
@@ -407,7 +427,7 @@
       <div class="upload-icon">📂</div>
       <div style="font-weight:600;color:var(--navy);">Klik atau drag & drop file CSV</div>
       <div class="upload-hint">
-        Header yang didukung: <strong>Seri, Kupon, JatuhTempo, HargaJual, HargaBeli, Yield, TanggalUpdate</strong>
+        Header yang didukung: <strong>Seri, Kupon, JatuhTempo, Rating, LastCouponDate, NextCouponDate, HargaJual, HargaBeli, Yield, DueDate, TanggalUpdate</strong>
       </div>
     </div>
     <input type="file" id="csvFileInput" accept=".csv" onchange="handleCSVFile(event)"/>
@@ -495,24 +515,30 @@
     const pageData = data.slice(start, end);
     const tbody = document.getElementById('tbody-' + cat);
     const idr = cat.endsWith('idr');
+    const isKorp = cat.startsWith('korp');
+    const colSpan = isKorp ? 12 : 11;
 
     document.getElementById('count-' + cat).textContent = total + ' seri';
     document.getElementById('info-' + cat).textContent =
       total === 0 ? 'Tidak ada data' : `Menampilkan ${start+1}–${end} dari ${total} data`;
 
     if (pageData.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📄</div><p>Belum ada data</p></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${colSpan}"><div class="empty-state"><div class="empty-icon">📄</div><p>Belum ada data</p></div></td></tr>`;
       renderPagination(cat, 0); return;
     }
 
     tbody.innerHTML = pageData.map(r => `
       <tr>
         <td><strong class="mono">${esc(r.seri||'—')}</strong></td>
-        <td style="color:#1a7a4a;">${r.kupon != null ? Number(r.kupon).toFixed(3) + '%' : '—'}</td>
         <td style="color:#555;">${fmtDate(r.jatuhTempo)}</td>
-        <td style="font-weight:600;">${fmtHarga(r.hargaJual, idr)}</td>
-        <td>${fmtHarga(r.hargaBeli, idr)}</td>
-        <td style="color:#7159c1;">${r.yield != null ? Number(r.yield).toFixed(4) + '%' : '—'}</td>
+        ${isKorp ? `<td><span style="background:#f0f4ff;padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;color:#2d4abf;">${esc(r.rating||'—')}</span></td>` : ''}
+        <td style="color:#1a7a4a;">${r.kupon != null ? Number(r.kupon).toFixed(3) + '%' : '—'}</td>
+        <td style="font-size:0.8rem;color:#666;">${fmtDate(r.lastCouponDate)}</td>
+        <td style="font-size:0.8rem;color:#666;">${fmtDate(r.nextCouponDate)}</td>
+        <td style="font-weight:600;color:#27ae60;">${fmtHarga(r.hargaJual, idr)}</td>
+        <td style="font-weight:600;color:#e74c3c;">${fmtHarga(r.hargaBeli, idr)}</td>
+        <td style="color:#7159c1;font-weight:600;">${r.yield != null ? Number(r.yield).toFixed(4) + '%' : '—'}</td>
+        <td style="font-size:0.8rem;color:#555;">${fmtDate(r.dueDate)}</td>
         <td style="font-size:0.8rem;color:#888;">${fmtDate(r.tanggalUpdate)}</td>
         <td>
           <div class="action-btns">
@@ -556,6 +582,7 @@
     document.getElementById('editDocId').value = '';
     if (cat) document.getElementById('fCategory').value = cat;
     document.getElementById('fTanggalUpdate').value = new Date().toISOString().slice(0,10);
+    toggleRatingField();
     document.getElementById('formModal').classList.add('open');
   }
 
@@ -571,21 +598,27 @@
     document.getElementById('fSeri').value = item.seri || '';
     document.getElementById('fKupon').value = item.kupon != null ? item.kupon : '';
     document.getElementById('fJatuhTempo').value = item.jatuhTempo || '';
+    document.getElementById('fRating').value = item.rating || '';
+    document.getElementById('fLastCoupon').value = item.lastCouponDate || '';
+    document.getElementById('fNextCoupon').value = item.nextCouponDate || '';
     document.getElementById('fHargaJual').value = item.hargaJual != null ? item.hargaJual : '';
     document.getElementById('fHargaBeli').value = item.hargaBeli != null ? item.hargaBeli : '';
     document.getElementById('fYield').value = item.yield != null ? item.yield : '';
+    document.getElementById('fDueDate').value = item.dueDate || '';
     document.getElementById('fTanggalUpdate').value = item.tanggalUpdate || '';
+    toggleRatingField();
     document.getElementById('formModal').classList.add('open');
   }
 
   function clearForm() {
-    ['fSeri','fKupon','fJatuhTempo','fHargaJual','fHargaBeli','fYield','fTanggalUpdate'].forEach(id => {
+    ['fSeri','fKupon','fJatuhTempo','fHargaJual','fHargaBeli','fYield','fTanggalUpdate','fRating','fLastCoupon','fNextCoupon','fDueDate'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('fCategory').disabled = false;
     document.getElementById('editDocId').value = '';
     document.getElementById('editCategory').value = '';
     document.getElementById('fCategory').value = activeTab;
+    toggleRatingField();
   }
 
   function closeFormModal(e) { if (e.target === document.getElementById('formModal')) { document.getElementById('fCategory').disabled = false; document.getElementById('formModal').classList.remove('open'); } }
@@ -596,15 +629,20 @@
     const seri = document.getElementById('fSeri').value.trim();
     if (!seri) { showToast('Seri wajib diisi!', 'error'); return; }
 
+    const isKorp = cat.startsWith('korp');
     const data = {
       seri,
-      kupon:         parseFloat(document.getElementById('fKupon').value) || null,
-      jatuhTempo:    document.getElementById('fJatuhTempo').value || '',
-      hargaJual:     parseFloat(document.getElementById('fHargaJual').value) || null,
-      hargaBeli:     parseFloat(document.getElementById('fHargaBeli').value) || null,
-      yield:         parseFloat(document.getElementById('fYield').value) || null,
-      tanggalUpdate: document.getElementById('fTanggalUpdate').value || new Date().toISOString().slice(0,10),
-      category:      cat,
+      kupon:          parseFloat(document.getElementById('fKupon').value) || null,
+      jatuhTempo:     document.getElementById('fJatuhTempo').value || '',
+      rating:         isKorp ? (document.getElementById('fRating').value.trim() || null) : null,
+      lastCouponDate: document.getElementById('fLastCoupon').value || null,
+      nextCouponDate: document.getElementById('fNextCoupon').value || null,
+      hargaJual:      parseFloat(document.getElementById('fHargaJual').value) || null,
+      hargaBeli:      parseFloat(document.getElementById('fHargaBeli').value) || null,
+      yield:          parseFloat(document.getElementById('fYield').value) || null,
+      dueDate:        document.getElementById('fDueDate').value || null,
+      tanggalUpdate:  document.getElementById('fTanggalUpdate').value || new Date().toISOString().slice(0,10),
+      category:       cat,
     };
 
     const btn = document.getElementById('formSaveBtn');
@@ -692,13 +730,17 @@
   function mapCSVRow(obj) {
     const g = (...keys) => { for (const k of keys) if (obj[k] !== undefined && obj[k] !== '') return obj[k]; return ''; };
     return {
-      seri:          g('seri','serie'),
-      kupon:         parseFloat(g('kupon','coupon')) || null,
-      jatuhTempo:    g('jatuhtempo','jatuh_tempo','maturity','maturitydate'),
-      hargaJual:     parseFloat(g('hargajual','harga_jual','ask','askprice')) || null,
-      hargaBeli:     parseFloat(g('hargabeli','harga_beli','bid','bidprice')) || null,
-      yield:         parseFloat(g('yield','ytm')) || null,
-      tanggalUpdate: g('tanggalupdate','tanggal_update','updatedate','date') || new Date().toISOString().slice(0,10),
+      seri:           g('seri','serie','series'),
+      kupon:          parseFloat(g('kupon','coupon')) || null,
+      jatuhTempo:     g('jatuhtempo','jatuh_tempo','maturity','maturitydate'),
+      rating:         g('rating') || null,
+      lastCouponDate: g('lastcoupondate','last_coupon_date','lastcoupon','last_coupon') || null,
+      nextCouponDate: g('nextcoupondate','next_coupon_date','nextcoupon','next_coupon') || null,
+      hargaJual:      parseFloat(g('hargajual','harga_jual','bid','bidprice')) || null,
+      hargaBeli:      parseFloat(g('hargabeli','harga_beli','offer','offerprice','ask','askprice')) || null,
+      yield:          parseFloat(g('yield','ytm')) || null,
+      dueDate:        g('duedate','due_date') || null,
+      tanggalUpdate:  g('tanggalupdate','tanggal_update','updatedate','date') || new Date().toISOString().slice(0,10),
     };
   }
 
@@ -716,8 +758,8 @@
   function renderCSVPreview() {
     document.getElementById('csvPreviewInfo').textContent = `${csvRows.length} data ditemukan. Preview 5 baris pertama:`;
     document.getElementById('csvPreview').innerHTML = `<table>
-      <thead><tr><th>Seri</th><th>Kupon</th><th>Jatuh Tempo</th><th>Harga Jual</th><th>Harga Beli</th><th>Yield</th></tr></thead>
-      <tbody>${csvRows.slice(0,5).map(r=>`<tr><td>${esc(r.seri)}</td><td>${r.kupon??''}</td><td>${r.jatuhTempo}</td><td>${r.hargaJual??''}</td><td>${r.hargaBeli??''}</td><td>${r.yield??''}</td></tr>`).join('')}</tbody>
+      <thead><tr><th>Series</th><th>Coupon</th><th>Rating</th><th>Last Coupon</th><th>Next Coupon</th><th>Bid</th><th>Offer</th><th>YTM</th><th>Due Date</th></tr></thead>
+      <tbody>${csvRows.slice(0,5).map(r=>`<tr><td>${esc(r.seri)}</td><td>${r.kupon??''}</td><td>${esc(r.rating||'')}</td><td>${r.lastCouponDate||''}</td><td>${r.nextCouponDate||''}</td><td>${r.hargaJual??''}</td><td>${r.hargaBeli??''}</td><td>${r.yield??''}</td><td>${r.dueDate||''}</td></tr>`).join('')}</tbody>
     </table>`;
     document.getElementById('csvPreviewWrap').style.display = 'block';
   }
@@ -748,8 +790,8 @@
   }
 
   function downloadTemplate() {
-    const H = 'Seri,Kupon,JatuhTempo,HargaJual,HargaBeli,Yield,TanggalUpdate';
-    const E = 'FR0100,6.375,2034-02-15,101.50,100.75,6.1234,2025-01-10';
+    const H = 'Seri,Kupon,JatuhTempo,Rating,LastCouponDate,NextCouponDate,HargaJual,HargaBeli,Yield,DueDate,TanggalUpdate';
+    const E = 'FR0100,6.375,2034-02-15,AAA,2025-01-15,2025-07-15,101.50,100.75,6.1234,2034-02-15,2025-01-10';
     const blob = new Blob([H+'\n'+E], {type:'text/csv'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = 'template_obligasi_pasar_sekunder.csv'; a.click();
@@ -759,8 +801,8 @@
   function exportCSV(cat) {
     const data = allData[cat];
     if (!data.length) { showToast('Tidak ada data untuk diexport', 'error'); return; }
-    const H = 'Seri,Kupon,JatuhTempo,HargaJual,HargaBeli,Yield,TanggalUpdate';
-    const rows = data.map(r => [r.seri,r.kupon??'',r.jatuhTempo??'',r.hargaJual??'',r.hargaBeli??'',r.yield??'',r.tanggalUpdate??''].map(v=>`"${v}"`).join(','));
+    const H = 'Seri,Kupon,JatuhTempo,Rating,LastCouponDate,NextCouponDate,Bid,Offer,YTM,DueDate,TanggalUpdate';
+    const rows = data.map(r => [r.seri,r.kupon??'',r.jatuhTempo??'',r.rating??'',r.lastCouponDate??'',r.nextCouponDate??'',r.hargaJual??'',r.hargaBeli??'',r.yield??'',r.dueDate??'',r.tanggalUpdate??''].map(v=>`"${v}"`).join(','));
     const blob = new Blob([H+'\n'+rows.join('\n')], {type:'text/csv;charset=utf-8;'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `obligasi_${cat}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
@@ -793,6 +835,19 @@
     document.getElementById('toastContainer').appendChild(t);
     setTimeout(() => t.remove(), 3500);
   }
+
+  // ===== RATING FIELD TOGGLE (only for Korporasi) =====
+  function toggleRatingField() {
+    const cat = document.getElementById('fCategory').value;
+    const ratingGroup = document.getElementById('fRatingGroup');
+    if (cat.startsWith('korp')) {
+      ratingGroup.style.display = 'flex';
+    } else {
+      ratingGroup.style.display = 'none';
+      document.getElementById('fRating').value = '';
+    }
+  }
+  document.getElementById('fCategory').addEventListener('change', toggleRatingField);
 
   // BOOT
   initAuth();
