@@ -134,7 +134,7 @@
       <div class="title-underline"></div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-      <input type="month" id="filterMonth" onchange="onFilterChange()" style="height:38px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Inter',sans-serif;font-size:0.82rem;"/>
+      <input type="month" id="filterMonth" onchange="loadData()" style="height:38px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Inter',sans-serif;font-size:0.82rem;"/>
       <select id="filterClient" onchange="onFilterChange()" style="height:38px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Inter',sans-serif;font-size:0.82rem;min-width:180px;">
         <option value="">Semua Nasabah</option>
       </select>
@@ -468,7 +468,6 @@
   }
 
   function onFilterChange() {
-    populateClientDropdown();
     applyFilter();
   }
 
