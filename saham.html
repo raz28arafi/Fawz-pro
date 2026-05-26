@@ -557,16 +557,42 @@
     `).join('');
   }
 
-  function renderSummary() {
+  async function renderSummary() {
     var month = document.getElementById('filterMonth').value;
     var monthlySummary = window.SahamAggregation.calculateMonthlySummary(filteredData);
     document.getElementById('summaryMonthlyVolume').textContent = formatRp(monthlySummary.totalVolume);
     document.getElementById('summaryMonthlyFee').textContent = formatRp(monthlySummary.totalFee);
     document.getElementById('summaryMonthlyClients').textContent = String(monthlySummary.activeClients);
-    var ytdSummary = window.SahamAggregation.calculateYTDSummary(allData, month);
-    document.getElementById('summaryYTDVolume').textContent = formatRp(ytdSummary.totalVolume);
-    document.getElementById('summaryYTDFee').textContent = formatRp(ytdSummary.totalFee);
-    document.getElementById('summaryYTDClients').textContent = String(ytdSummary.activeClients);
+
+    // YTD: fetch from Jan 1 of selected year until today
+    try {
+      var year = month.split('-')[0];
+      var startDate = year + '-01-01';
+      var today = new Date();
+      var endDate = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+
+      var { data: ytdData, error } = await _sb
+        .from('saham_transaksi')
+        .select('volume, fee, client_id')
+        .gte('tanggal', startDate)
+        .lte('tanggal', endDate)
+        .limit(50000);
+
+      if (error) throw error;
+
+      var totalVolume = 0, totalFee = 0, clientIds = new Set();
+      (ytdData || []).forEach(function(tx) {
+        totalVolume += Number(tx.volume) || 0;
+        totalFee += Number(tx.fee) || 0;
+        clientIds.add(tx.client_id);
+      });
+
+      document.getElementById('summaryYTDVolume').textContent = formatRp(totalVolume);
+      document.getElementById('summaryYTDFee').textContent = formatRp(totalFee);
+      document.getElementById('summaryYTDClients').textContent = String(clientIds.size);
+    } catch(e) {
+      console.error('YTD fetch error:', e);
+    }
   }
 
   // Type selector logic for input modal
