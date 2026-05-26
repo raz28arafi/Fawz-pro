@@ -1080,6 +1080,9 @@
 
   async function uploadCSVData() {
     if (!csvRows.length) return;
+    const uploadType = document.querySelector('input[name="uploadType"]:checked').value;
+    const uploadMonth = document.getElementById('uploadMonth').value;
+    if (!confirm('Upload ' + csvRows.length + ' transaksi ' + uploadType.toUpperCase() + ' untuk bulan ' + uploadMonth + '?')) return;
     const btn = document.getElementById('btnUpload');
     const statusEl = document.getElementById('uploadStatus');
     btn.disabled = true;
