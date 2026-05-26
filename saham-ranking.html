@@ -186,15 +186,29 @@
     var endDate = year + '-' + String(mon).padStart(2,'0') + '-' + String(lastDay).padStart(2,'0');
 
     try {
-      var { data, error } = await _sb
-        .from('saham_transaksi')
-        .select('*')
-        .gte('tanggal', startDate)
-        .lte('tanggal', endDate)
-        .limit(10000);
+      var transactions = [];
+      var pageSize = 1000;
+      var offset = 0;
+      var hasMore = true;
 
-      if (error) throw error;
-      var transactions = data || [];
+      while (hasMore) {
+        var { data, error } = await _sb
+          .from('saham_transaksi')
+          .select('*')
+          .gte('tanggal', startDate)
+          .lte('tanggal', endDate)
+          .range(offset, offset + pageSize - 1);
+
+        if (error) throw error;
+        var rows = data || [];
+        transactions = transactions.concat(rows);
+
+        if (rows.length < pageSize) {
+          hasMore = false;
+        } else {
+          offset += pageSize;
+        }
+      }
 
       // Sort
       var sortBy = document.getElementById('sortBy').value;

@@ -405,20 +405,44 @@
   async function loadData() {
     try {
       const month = document.getElementById('filterMonth').value;
-      let query = _sb.from('saham_transaksi').select('*').order('tanggal', { ascending: false });
       
-      // Filter by month at database level to avoid Supabase 1000 row default limit
+      // Filter by month at database level with pagination to get all rows
       if (month) {
         const [year, mon] = month.split('-').map(Number);
         const startDate = month + '-01';
         const lastDay = new Date(year, mon, 0).getDate();
         const endDate = year + '-' + String(mon).padStart(2,'0') + '-' + String(lastDay).padStart(2,'0');
-        query = query.gte('tanggal', startDate).lte('tanggal', endDate);
+        
+        allData = [];
+        var pageSize = 1000;
+        var offset = 0;
+        var hasMore = true;
+
+        while (hasMore) {
+          const { data, error } = await _sb
+            .from('saham_transaksi')
+            .select('*')
+            .gte('tanggal', startDate)
+            .lte('tanggal', endDate)
+            .order('tanggal', { ascending: false })
+            .range(offset, offset + pageSize - 1);
+
+          if (error) throw error;
+          var rows = data || [];
+          allData = allData.concat(rows);
+
+          if (rows.length < pageSize) {
+            hasMore = false;
+          } else {
+            offset += pageSize;
+          }
+        }
+      } else {
+        const { data, error } = await _sb.from('saham_transaksi').select('*').order('tanggal', { ascending: false });
+        if (error) throw error;
+        allData = data || [];
       }
       
-      const { data, error } = await query;
-      if (error) throw error;
-      allData = data || [];
       populateClientDropdown();
       applyFilter();
     } catch(e) {
@@ -564,27 +588,40 @@
     document.getElementById('summaryMonthlyFee').textContent = formatRp(monthlySummary.totalFee);
     document.getElementById('summaryMonthlyClients').textContent = String(monthlySummary.activeClients);
 
-    // YTD: fetch from Jan 1 to Dec 31 of selected year
+    // YTD: fetch from Jan 1 to Dec 31 of selected year (with pagination)
     try {
       var year = month.split('-')[0];
       var startDate = year + '-01-01';
       var endDate = year + '-12-31';
 
-      var { data: ytdData, error } = await _sb
-        .from('saham_transaksi')
-        .select('volume, fee, client_id')
-        .gte('tanggal', startDate)
-        .lte('tanggal', endDate)
-        .limit(50000);
-
-      if (error) throw error;
-
       var totalVolume = 0, totalFee = 0, clientIds = new Set();
-      (ytdData || []).forEach(function(tx) {
-        totalVolume += Number(tx.volume) || 0;
-        totalFee += Number(tx.fee) || 0;
-        clientIds.add(tx.client_id);
-      });
+      var pageSize = 1000;
+      var offset = 0;
+      var hasMore = true;
+
+      while (hasMore) {
+        var { data: ytdPage, error } = await _sb
+          .from('saham_transaksi')
+          .select('volume, fee, client_id')
+          .gte('tanggal', startDate)
+          .lte('tanggal', endDate)
+          .range(offset, offset + pageSize - 1);
+
+        if (error) throw error;
+
+        var rows = ytdPage || [];
+        for (var j = 0; j < rows.length; j++) {
+          totalVolume += Number(rows[j].volume) || 0;
+          totalFee += Number(rows[j].fee) || 0;
+          clientIds.add(rows[j].client_id);
+        }
+
+        if (rows.length < pageSize) {
+          hasMore = false;
+        } else {
+          offset += pageSize;
+        }
+      }
 
       document.getElementById('summaryYTDVolume').textContent = formatRp(totalVolume);
       document.getElementById('summaryYTDFee').textContent = formatRp(totalFee);
