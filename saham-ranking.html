@@ -116,20 +116,22 @@
   <!-- Transaction Table -->
   <div class="section-title">📋 Daftar Transaksi</div>
   <div class="table-wrapper">
-    <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Tanggal</th>
+          <th>Client ID</th>
+          <th>Nama Nasabah</th>
+          <th>Volume (Rp)</th>
+          <th>Fee (Rp)</th>
+          <th>Sales</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+    </table>
+    <div style="max-height:680px;overflow-y:auto;">
       <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Tanggal</th>
-            <th>Client ID</th>
-            <th>Nama Nasabah</th>
-            <th>Volume (Rp)</th>
-            <th>Fee (Rp)</th>
-            <th>Sales</th>
-            <th>Catatan</th>
-          </tr>
-        </thead>
         <tbody id="transactionBody">
           <tr><td colspan="8"><div class="empty-state">⏳ Memuat data...</div></td></tr>
         </tbody>
