@@ -740,7 +740,7 @@
           <div class="nominal-val">${fmtRp(o.face_amount||o.faceAmount||o.nominal)}</div>
           <div class="nominal-unit">${(o.unit_amount||o.unitAmount) ? (o.unit_amount||o.unitAmount)+' unit' : (o.mata_uang||o.mataUang||'IDR')}</div>
         </td>
-        <td style="font-size:.85rem;color:var(--gray);font-family:monospace;">${o.harga||'—'}</td>
+        <td style="font-size:.85rem;color:var(--navy);font-weight:600;">${fmtHargaOrder(o)}</td>
         <td style="font-size:.8rem;color:var(--gray);">${fmtDate(o.settlement)}</td>
         <td style="font-size:.8rem;">${esc(o.sekuritas_dipakai||o.sekuritasDipakai||'—')}</td>
         <td style="font-size:.85rem;">${esc(o.sales_pic||o.salesPic||'—')}</td>
@@ -1316,9 +1316,9 @@
       const diffMin = (now - createdAt) / 60000;
       if (diffMin <= 15) {
         const remaining = Math.ceil(15 - diffMin);
-        html += `<button class="btn-icon del" title="Batalkan (${remaining} mnt tersisa)" onclick="cancelMyOrder('${o.id}')">✕ <span style="font-size:.6rem;">${remaining}m</span></button>`;
+        html += `<button class="btn-icon del" title="Batalkan pesanan" style="width:auto;padding:4px 10px;font-size:.72rem;gap:4px;display:inline-flex;align-items:center;" onclick="cancelMyOrder('${o.id}')">✕ Batal <span style="background:#fff0f0;padding:1px 5px;border-radius:4px;font-size:.65rem;color:#e74c3c;">${remaining}m</span></button>`;
       } else {
-        html += `<span style="font-size:.65rem;color:#aaa;">Batas batal habis</span>`;
+        html += `<span style="font-size:.65rem;color:#ccc;font-style:italic;">Batas batal habis</span>`;
       }
     }
 
@@ -1412,6 +1412,13 @@
     if (n >= 1e9)  return 'Rp '+(n/1e9).toFixed(2)+' M';
     if (n >= 1e6)  return 'Rp '+(n/1e6).toFixed(1)+' jt';
     return 'Rp '+n.toLocaleString('id-ID');
+  }
+
+  function fmtHargaOrder(o) {
+    // Show harga_beli (offer price) from the order data
+    const harga = o.harga_beli || o.hargaBeli || o.harga_jual || o.hargaJual || o.harga;
+    if (!harga || harga === 0) return '—';
+    return Number(harga).toFixed(2).replace('.', ',');
   }
 
   function fmtRpFull(val) {
