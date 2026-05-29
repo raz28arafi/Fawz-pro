@@ -279,12 +279,12 @@
       <div class="table-wrap">
         <table class="obligasi-korp-idr">
           <thead><tr>
-            <th>Series</th><th>Jatuh Tempo</th><th>Rating</th><th>Coupon (%)</th>
+            <th>Series</th><th>Penerbit</th><th>Jatuh Tempo</th><th>Rating</th><th>Coupon (%)</th>
             <th>Last Coupon</th><th>Next Coupon</th>
             <th>Bid</th><th>Offer</th><th>YTM (%)</th>
             <th>Due Date</th><th>Tgl. Update</th><th>Aksi</th>
           </tr></thead>
-          <tbody id="tbody-korp-idr"><tr><td colspan="12"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
+          <tbody id="tbody-korp-idr"><tr><td colspan="13"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
         </table>
       </div>
       <div class="table-footer">
@@ -316,12 +316,12 @@
       <div class="table-wrap">
         <table class="obligasi-korp-usd">
           <thead><tr>
-            <th>Series</th><th>Jatuh Tempo</th><th>Rating</th><th>Coupon (%)</th>
+            <th>Series</th><th>Penerbit</th><th>Jatuh Tempo</th><th>Rating</th><th>Coupon (%)</th>
             <th>Last Coupon</th><th>Next Coupon</th>
             <th>Bid</th><th>Offer</th><th>YTM (%)</th>
             <th>Due Date</th><th>Tgl. Update</th><th>Aksi</th>
           </tr></thead>
-          <tbody id="tbody-korp-usd"><tr><td colspan="12"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
+          <tbody id="tbody-korp-usd"><tr><td colspan="13"><div class="empty-state"><div class="empty-icon">⏳</div><p>Memuat data...</p></div></td></tr></tbody>
         </table>
       </div>
       <div class="table-footer">
@@ -355,7 +355,11 @@
     <div class="form-grid">
       <div class="form-group full">
         <label class="form-label">Series <span class="req">*</span></label>
-        <input class="form-input" id="fSeri" placeholder="Contoh: FR0100, INDO30, PPLN03CN3"/>
+        <input class="form-input" id="fSeri" placeholder="Contoh: FR0100, INDO30, PPLN03CN3" oninput="autoFillPenerbit()"/>
+      </div>
+      <div class="form-group full" id="fPenerbitGroup" style="display:none;">
+        <label class="form-label">Penerbit <span style="font-size:0.65rem;color:#888;">(Otomatis dari kode series)</span></label>
+        <input class="form-input" id="fPenerbit" placeholder="Nama penerbit akan terisi otomatis..." style="background:#f8f9ff;"/>
       </div>
       <div class="form-group">
         <label class="form-label">Jatuh Tempo</label>
@@ -516,7 +520,7 @@
     const tbody = document.getElementById('tbody-' + cat);
     const idr = cat.endsWith('idr');
     const isKorp = cat.startsWith('korp');
-    const colSpan = isKorp ? 12 : 11;
+    const colSpan = isKorp ? 13 : 11;
 
     document.getElementById('count-' + cat).textContent = total + ' seri';
     document.getElementById('info-' + cat).textContent =
@@ -530,6 +534,7 @@
     tbody.innerHTML = pageData.map(r => `
       <tr>
         <td><strong class="mono">${esc(r.seri||'—')}</strong></td>
+        ${isKorp ? `<td style="font-size:0.78rem;color:#444;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(r.penerbit||'')}">${esc(r.penerbit||'—')}</td>` : ''}
         <td style="color:#555;">${fmtDate(r.jatuhTempo)}</td>
         ${isKorp ? `<td><span style="background:#f0f4ff;padding:2px 8px;border-radius:6px;font-size:0.78rem;font-weight:700;color:#2d4abf;">${esc(r.rating||'—')}</span></td>` : ''}
         <td style="color:#1a7a4a;">${r.kupon != null ? Number(r.kupon).toFixed(3) + '%' : '—'}</td>
@@ -599,6 +604,7 @@
     document.getElementById('fKupon').value = item.kupon != null ? item.kupon : '';
     document.getElementById('fJatuhTempo').value = item.jatuhTempo || '';
     document.getElementById('fRating').value = item.rating || '';
+    document.getElementById('fPenerbit').value = item.penerbit || '';
     document.getElementById('fLastCoupon').value = item.lastCouponDate || '';
     document.getElementById('fNextCoupon').value = item.nextCouponDate || '';
     document.getElementById('fHargaJual').value = item.hargaJual != null ? item.hargaJual : '';
@@ -611,7 +617,7 @@
   }
 
   function clearForm() {
-    ['fSeri','fKupon','fJatuhTempo','fHargaJual','fHargaBeli','fYield','fTanggalUpdate','fRating','fLastCoupon','fNextCoupon','fDueDate'].forEach(id => {
+    ['fSeri','fKupon','fJatuhTempo','fHargaJual','fHargaBeli','fYield','fTanggalUpdate','fRating','fLastCoupon','fNextCoupon','fDueDate','fPenerbit'].forEach(id => {
       const el = document.getElementById(id); if (el) el.value = '';
     });
     document.getElementById('fCategory').disabled = false;
@@ -635,6 +641,7 @@
       kupon:          parseFloat(document.getElementById('fKupon').value) || null,
       jatuhTempo:     document.getElementById('fJatuhTempo').value || '',
       rating:         isKorp ? (document.getElementById('fRating').value.trim() || null) : null,
+      penerbit:       isKorp ? (document.getElementById('fPenerbit').value.trim() || null) : null,
       lastCouponDate: document.getElementById('fLastCoupon').value || null,
       nextCouponDate: document.getElementById('fNextCoupon').value || null,
       hargaJual:      parseFloat(document.getElementById('fHargaJual').value) || null,
@@ -729,11 +736,14 @@
 
   function mapCSVRow(obj) {
     const g = (...keys) => { for (const k of keys) if (obj[k] !== undefined && obj[k] !== '') return obj[k]; return ''; };
+    const seri = g('seri','serie','series');
+    const ticker = extractTicker(seri);
     return {
-      seri:           g('seri','serie','series'),
+      seri,
       kupon:          parseFloat(g('kupon','coupon')) || null,
       jatuhTempo:     g('jatuhtempo','jatuh_tempo','maturity','maturitydate'),
       rating:         g('rating') || null,
+      penerbit:       g('penerbit','issuer','emiten') || (ISSUER_MAP[ticker] || null),
       lastCouponDate: g('lastcoupondate','last_coupon_date','lastcoupon','last_coupon') || null,
       nextCouponDate: g('nextcoupondate','next_coupon_date','nextcoupon','next_coupon') || null,
       hargaJual:      parseFloat(g('hargajual','harga_jual','bid','bidprice')) || null,
@@ -836,15 +846,126 @@
     setTimeout(() => t.remove(), 3500);
   }
 
+  // ===== PENERBIT AUTO-FILL (Korporasi) =====
+  // Mapping kode ticker obligasi korporasi → nama penerbit
+  const ISSUER_MAP = {
+    'INET': 'PT Sinergi Inti Andalan Prima',
+    'ADHI': 'PT Adhi Karya (Persero) Tbk',
+    'ADMF': 'PT Adira Dinamika Multi Finance Tbk',
+    'AGII': 'PT Aneka Gas Industri Tbk',
+    'AKRA': 'PT AKR Corporindo Tbk',
+    'AMRT': 'PT Sumber Alfaria Trijaya Tbk',
+    'ANTM': 'PT Aneka Tambang Tbk',
+    'ASDF': 'PT Astra Sedaya Finance',
+    'ASII': 'PT Astra International Tbk',
+    'BBCA': 'PT Bank Central Asia Tbk',
+    'BBNI': 'PT Bank Negara Indonesia (Persero) Tbk',
+    'BBRI': 'PT Bank Rakyat Indonesia (Persero) Tbk',
+    'BBTN': 'PT Bank Tabungan Negara (Persero) Tbk',
+    'BCAF': 'PT BCA Finance',
+    'BFIN': 'PT BFI Finance Indonesia Tbk',
+    'BJBR': 'PT Bank Pembangunan Daerah Jawa Barat dan Banten Tbk',
+    'BMRI': 'PT Bank Mandiri (Persero) Tbk',
+    'BMTR': 'PT Global Mediacom Tbk',
+    'BNII': 'PT Bank Maybank Indonesia Tbk',
+    'BRIS': 'PT Bank Syariah Indonesia Tbk',
+    'BRPT': 'PT Barito Pacific Tbk',
+    'BSDE': 'PT Bumi Serpong Damai Tbk',
+    'CPIN': 'PT Charoen Pokphand Indonesia Tbk',
+    'DILD': 'PT Intiland Development Tbk',
+    'ELSA': 'PT Elnusa Tbk',
+    'EXCL': 'PT XL Axiata Tbk',
+    'FIFA': 'PT Federal International Finance',
+    'GIAA': 'PT Garuda Indonesia (Persero) Tbk',
+    'HMSP': 'PT HM Sampoerna Tbk',
+    'ICBP': 'PT Indofood CBP Sukses Makmur Tbk',
+    'IIFF': 'PT Indonesia Infrastructure Finance',
+    'IMFI': 'PT Indomobil Finance Indonesia',
+    'INDF': 'PT Indofood Sukses Makmur Tbk',
+    'INKP': 'PT Indah Kiat Pulp & Paper Tbk',
+    'ISAT': 'PT Indosat Tbk',
+    'JSMR': 'PT Jasa Marga (Persero) Tbk',
+    'KLBF': 'PT Kalbe Farma Tbk',
+    'LPKR': 'PT Lippo Karawaci Tbk',
+    'LPPF': 'PT Matahari Department Store Tbk',
+    'MAPI': 'PT Mitra Adiperkasa Tbk',
+    'MDKA': 'PT Merdeka Copper Gold Tbk',
+    'MEDC': 'PT Medco Energi Internasional Tbk',
+    'MFIN': 'PT Mandiri Tunas Finance',
+    'MNCN': 'PT MNC Investama Tbk',
+    'MORA': 'PT Mora Telematika Indonesia Tbk',
+    'NISP': 'PT Bank OCBC NISP Tbk',
+    'PGAS': 'PT Perusahaan Gas Negara Tbk',
+    'PJAA': 'PT Pembangunan Jaya Ancol Tbk',
+    'PLIN': 'PT Plaza Indonesia Realty Tbk',
+    'PNBN': 'PT Bank Pan Indonesia Tbk',
+    'PPLN': 'PT Perusahaan Listrik Negara (Persero)',
+    'PTPP': 'PT PP (Persero) Tbk',
+    'SANF': 'PT Sarana Multi Infrastruktur (Persero)',
+    'SIMP': 'PT Salim Ivomas Pratama Tbk',
+    'SMGR': 'PT Semen Indonesia (Persero) Tbk',
+    'SMRA': 'PT Summarecon Agung Tbk',
+    'SMAR': 'PT SMART Tbk',
+    'SMFP': 'PT Sarana Multigriya Finansial (Persero)',
+    'SSIA': 'PT Surya Semesta Internusa Tbk',
+    'TBIG': 'PT Tower Bersama Infrastructure Tbk',
+    'TINS': 'PT Timah Tbk',
+    'TLKM': 'PT Telkom Indonesia (Persero) Tbk',
+    'TOWR': 'PT Sarana Menara Nusantara Tbk',
+    'TPIA': 'PT Chandra Asri Petrochemical Tbk',
+    'UNTR': 'PT United Tractors Tbk',
+    'UNVR': 'PT Unilever Indonesia Tbk',
+    'WIKA': 'PT Wijaya Karya (Persero) Tbk',
+    'WOMF': 'PT Wahana Ottomitra Multiartha Tbk',
+    'WSKT': 'PT Waskita Karya (Persero) Tbk',
+  };
+
+  /**
+   * Extract ticker prefix from bond series code.
+   * e.g. "INET01ACN1" → "INET", "PPLN03CN3" → "PPLN", "BBRI02BCN2" → "BBRI"
+   */
+  function extractTicker(series) {
+    if (!series) return '';
+    // Ambil huruf di awal sampai ketemu angka
+    const match = series.toUpperCase().match(/^([A-Z]+)/);
+    return match ? match[1] : '';
+  }
+
+  function autoFillPenerbit() {
+    const cat = document.getElementById('fCategory').value;
+    if (!cat.startsWith('korp')) return;
+
+    const seri = document.getElementById('fSeri').value.trim();
+    const ticker = extractTicker(seri);
+    const penerbitEl = document.getElementById('fPenerbit');
+
+    if (ticker && ISSUER_MAP[ticker]) {
+      penerbitEl.value = ISSUER_MAP[ticker];
+      penerbitEl.style.color = '#1a7a4a';
+    } else if (ticker && ticker.length >= 3) {
+      penerbitEl.value = '';
+      penerbitEl.placeholder = 'Ticker "' + ticker + '" belum terdaftar — isi manual';
+      penerbitEl.style.color = '';
+    } else {
+      penerbitEl.value = '';
+      penerbitEl.placeholder = 'Nama penerbit akan terisi otomatis...';
+      penerbitEl.style.color = '';
+    }
+  }
+
   // ===== RATING FIELD TOGGLE (only for Korporasi) =====
   function toggleRatingField() {
     const cat = document.getElementById('fCategory').value;
     const ratingGroup = document.getElementById('fRatingGroup');
+    const penerbitGroup = document.getElementById('fPenerbitGroup');
     if (cat.startsWith('korp')) {
       ratingGroup.style.display = 'flex';
+      penerbitGroup.style.display = 'flex';
     } else {
       ratingGroup.style.display = 'none';
+      penerbitGroup.style.display = 'none';
       document.getElementById('fRating').value = '';
+      document.getElementById('fPenerbit').value = '';
     }
   }
   document.getElementById('fCategory').addEventListener('change', toggleRatingField);
