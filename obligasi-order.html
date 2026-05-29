@@ -692,9 +692,12 @@
 
     filtered = orders.filter(o => {
       const matchSeri   = !filterSeri || o.seri === filterSeri;
-      const matchQ      = !q || (o.customerName||'').toLowerCase().includes(q) || (o.seri||'').toLowerCase().includes(q) || (o.salesPic||'').toLowerCase().includes(q) || (o.customerId||'').toLowerCase().includes(q);
+      const oName = o.customer_name || o.customerName || '';
+      const oSales = o.sales_pic || o.salesPic || '';
+      const oClientId = o.client_id || o.customerId || '';
+      const matchQ      = !q || oName.toLowerCase().includes(q) || (o.seri||'').toLowerCase().includes(q) || oSales.toLowerCase().includes(q) || oClientId.toLowerCase().includes(q);
       const matchStatus = !status || o.status === status;
-      const matchSales  = !sales  || o.salesPic === sales;
+      const matchSales  = !sales  || oSales === sales;
       return matchSeri && matchQ && matchStatus && matchSales;
     });
 
@@ -726,28 +729,27 @@
         <td style="color:var(--gray);font-size:.8rem;">${idx+1}</td>
         <td>${jenisBadge2}</td>
         <td>
-          <div class="customer-name">${esc(o.customerName||'—')}</div>
-          <div class="customer-sid">${esc(o.customerId||'')}</div>
+          <div class="customer-name">${esc(o.customer_name||o.customerName||'—')}</div>
+          <div class="customer-sid">${esc(o.client_id||o.customerId||'')}</div>
         </td>
         <td>
           <div class="order-seri">${esc(o.seri||'—')}</div>
           <div class="order-cat">${esc(CAT_LABEL[o.category]||o.category||'')}</div>
         </td>
         <td>
-          <div class="nominal-val">${fmtRp(o.faceAmount||o.nominal)}</div>
-          <div class="nominal-unit">${o.unitAmount ? o.unitAmount+' unit' : 'IDR'}</div>
+          <div class="nominal-val">${fmtRp(o.face_amount||o.faceAmount||o.nominal)}</div>
+          <div class="nominal-unit">${(o.unit_amount||o.unitAmount) ? (o.unit_amount||o.unitAmount)+' unit' : (o.mata_uang||o.mataUang||'IDR')}</div>
         </td>
         <td style="font-size:.85rem;color:var(--gray);font-family:monospace;">${o.harga||'—'}</td>
         <td style="font-size:.8rem;color:var(--gray);">${fmtDate(o.settlement)}</td>
-        <td style="font-size:.8rem;">${esc(o.sekuritasDipakai||'—')}</td>
-        <td style="font-size:.85rem;">${esc(o.salesPic||'—')}</td>
-        <td style="font-size:.8rem;color:var(--gray);">${fmtDate(o.tanggalOrder)}</td>
+        <td style="font-size:.8rem;">${esc(o.sekuritas_dipakai||o.sekuritasDipakai||'—')}</td>
+        <td style="font-size:.85rem;">${esc(o.sales_pic||o.salesPic||'—')}</td>
+        <td style="font-size:.8rem;color:var(--gray);">${fmtDate(o.tanggal_order||o.tanggalOrder)}</td>
         <td>${statusBadge}</td>
         <td>
           <div class="action-btns">
             <button class="btn-icon" title="Detail" onclick="showDetail('${o.id}')">👁</button>
-            ${canEdit ? `<button class="btn-icon" title="Edit" onclick="openEditModal('${o.id}')">✏️</button>` : ''}
-            ${canEdit ? `<button class="btn-icon del" title="Hapus" onclick="deleteOrder('${o.id}')">🗑</button>` : ''}
+            ${renderOrderActions(o)}
           </div>
         </td>
       </tr>`;
@@ -794,7 +796,7 @@
   }
 
   function populateSalesFilter() {
-    const salesSet = new Set(orders.map(o => o.salesPic).filter(Boolean));
+    const salesSet = new Set(orders.map(o => o.sales_pic || o.salesPic).filter(Boolean));
     const sel = document.getElementById('filterSales');
     salesSet.forEach(s => {
       const opt = document.createElement('option');
@@ -1292,6 +1294,87 @@
     a.download = `order-obligasi-${filterSeri||'semua'}-${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     showToast(`${filtered.length} order diexport`, 'success');
+  }
+
+  function renderOrderActions(o) {
+    if (o.status !== 'pending') return ''; // No actions for non-pending orders
+
+    const isAdmin = curUser && ['head_account','treasury','admin'].includes(curUser.role);
+    const isSales = curUser && curUser.role === 'sales';
+    const isOwner = curUser && (o.sales_pic === curUser.name || o.salesPic === curUser.name);
+
+    let html = '';
+
+    if (isAdmin) {
+      // Admin/Treasury/Head Account: ACC or Batalkan
+      html += `<button class="btn-icon" title="Approve" style="color:#27ae60;border-color:#a8e6c1;" onclick="approveOrder('${o.id}')">✓</button>`;
+      html += `<button class="btn-icon del" title="Batalkan" onclick="rejectOrder('${o.id}')">✕</button>`;
+    } else if (isSales && isOwner) {
+      // Sales: only cancel within 15 minutes
+      const createdAt = new Date(o.created_at);
+      const now = new Date();
+      const diffMin = (now - createdAt) / 60000;
+      if (diffMin <= 15) {
+        const remaining = Math.ceil(15 - diffMin);
+        html += `<button class="btn-icon del" title="Batalkan (${remaining} mnt tersisa)" onclick="cancelMyOrder('${o.id}')">✕ <span style="font-size:.6rem;">${remaining}m</span></button>`;
+      } else {
+        html += `<span style="font-size:.65rem;color:#aaa;">Batas batal habis</span>`;
+      }
+    }
+
+    return html;
+  }
+
+  async function approveOrder(id) {
+    if (!confirm('Approve order ini?')) return;
+    try {
+      const { error } = await window._supabase.from('bb_orders').update({
+        status: 'verified',
+        verified_by: curUser?.name || '',
+        verified_at: new Date().toISOString()
+      }).eq('id', id);
+      if (error) throw error;
+      showToast('Order berhasil di-approve', 'success');
+      await loadOrders();
+      applyFilter();
+    } catch(e) { showToast('Gagal approve: ' + (e.message||''), 'error'); }
+  }
+
+  async function rejectOrder(id) {
+    const reason = prompt('Alasan pembatalan (opsional):');
+    if (reason === null) return; // user cancelled prompt
+    try {
+      const { error } = await window._supabase.from('bb_orders').update({
+        status: 'rejected',
+        verified_by: curUser?.name || '',
+        verified_at: new Date().toISOString(),
+        rejected_reason: reason || null
+      }).eq('id', id);
+      if (error) throw error;
+      showToast('Order dibatalkan', 'success');
+      await loadOrders();
+      applyFilter();
+    } catch(e) { showToast('Gagal membatalkan: ' + (e.message||''), 'error'); }
+  }
+
+  async function cancelMyOrder(id) {
+    if (!confirm('Batalkan pesanan ini?')) return;
+    // Double check 15 min limit
+    const order = orders.find(o => o.id === id);
+    if (order) {
+      const diffMin = (new Date() - new Date(order.created_at)) / 60000;
+      if (diffMin > 15) { showToast('Batas waktu pembatalan (15 menit) sudah habis', 'error'); return; }
+    }
+    try {
+      const { error } = await window._supabase.from('bb_orders').update({
+        status: 'rejected',
+        rejected_reason: 'Dibatalkan oleh sales'
+      }).eq('id', id);
+      if (error) throw error;
+      showToast('Pesanan berhasil dibatalkan', 'success');
+      await loadOrders();
+      applyFilter();
+    } catch(e) { showToast('Gagal membatalkan: ' + (e.message||''), 'error'); }
   }
 
   // =====================================================================

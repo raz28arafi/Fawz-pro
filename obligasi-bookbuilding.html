@@ -370,10 +370,6 @@
           <option value="">-- Pilih Sekuritas --</option>
         </select>
       </div>
-      <div class="form-group" id="ordCatatanGroup">
-        <label class="form-label">Catatan <span style="font-size:.65rem;color:#888;">(Admin/Treasury/Head)</span></label>
-        <textarea class="form-textarea" id="ordCatatan" placeholder="Catatan order..." rows="2"></textarea>
-      </div>
     </div>
 
     <div class="modal-footer">
@@ -968,7 +964,6 @@
     const settlement = document.getElementById('ordSettlement').value;
     const nextCoupon = document.getElementById('ordNextCoupon').value;
     const sekuritas = document.getElementById('ordSekuritas').value;
-    const catatan = document.getElementById('ordCatatan').value.trim();
 
     if (!clientId) { showToast('Pilih client terlebih dahulu', 'error'); return; }
     if (amount < 100) { showToast('Amount minimal 100', 'error'); return; }
@@ -1011,7 +1006,7 @@
         tanggal_order: new Date().toISOString().slice(0, 10),
         sales_pic: curUser?.name || '',
         sales_code: curUser?.username || '',
-        catatan: catatan || null,
+        catatan: null,
         status: 'pending',
         created_by: curUser?.name || '',
       };
