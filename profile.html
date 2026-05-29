@@ -337,7 +337,10 @@
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase accounts error:', error.message, error.code, error.details);
+        throw error;
+      }
 
       let list = accounts || [];
       // Selalu pastikan head_account ada di list
@@ -349,8 +352,18 @@
       renderAccountList(list);
     } catch (err) {
       console.error('Gagal load akun:', err);
+      // Jika error karena RLS atau tabel tidak ada, tampilkan pesan yang lebih jelas
+      const errMsg = err.message || '';
+      let displayMsg = '⚠️ Gagal memuat data akun.';
+      if (errMsg.includes('permission denied') || errMsg.includes('RLS')) {
+        displayMsg += ' (RLS policy belum diset — jalankan: ALTER TABLE accounts DISABLE ROW LEVEL SECURITY;)';
+      } else if (errMsg.includes('does not exist') || errMsg.includes('relation')) {
+        displayMsg += ' (Tabel accounts belum dibuat di Supabase)';
+      } else {
+        displayMsg += ' Periksa koneksi. Detail: ' + errMsg;
+      }
       document.getElementById('accountList').innerHTML =
-        '<div style="color:#e74c3c;font-size:0.85rem;padding:8px;">⚠️ Gagal memuat data akun. Periksa koneksi.</div>';
+        '<div style="color:#e74c3c;font-size:0.85rem;padding:8px;">' + displayMsg + '</div>';
     }
   }
 
