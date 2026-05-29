@@ -1244,35 +1244,56 @@
     const statusLabel = { pending:'Pending', verified:'Terverifikasi', rejected:'Ditolak' }[o.status] || o.status;
     const statusColor = { pending:'#b37a00', verified:'#1e7e4e', rejected:'#c0392b' }[o.status] || '#888';
 
-    const jenisBadge = o.jenisTransaksi === 'Beli'
+    const jenis = o.jenis_transaksi || o.jenisTransaksi || 'Beli';
+    const jenisBadge = jenis === 'Beli'
       ? '<span style="background:#e8f8f0;color:var(--green);font-weight:700;padding:3px 12px;border-radius:20px;font-size:.78rem;">🟢 Beli</span>'
       : '<span style="background:#fff0f0;color:var(--red);font-weight:700;padding:3px 12px;border-radius:20px;font-size:.78rem;">🔴 Jual</span>';
     const di = (label, val, mono) => `<div><div style="font-size:.62rem;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">${label}</div><div style="font-weight:600;font-size:.88rem;${mono?'font-family:monospace;':''}">${esc(String(val||'—'))}</div></div>`;
+
+    const nasabah = o.customer_name || o.customerName || '—';
+    const clientId = o.client_id || o.customerId || '';
+    const seri = o.seri || '—';
+    const mataUang = o.mata_uang || o.mataUang || 'IDR';
+    const jenisObl = o.jenis_obligasi || o.jenisObligasi || '—';
+    const rating = o.rating || '-';
+    const hargaBeli = o.harga_beli || o.hargaBeli;
+    const hargaJual = o.harga_jual || o.hargaJual;
+    const ytm = o.ytm;
+    const faceAmount = o.face_amount || o.faceAmount || o.nominal;
+    const unitAmount = o.unit_amount || o.unitAmount;
+    const sekuritas = o.sekuritas_dipakai || o.sekuritasDipakai || '—';
+    const jatuhTempo = o.jatuh_tempo || o.jatuhTempo;
+    const kuponTerakhir = o.kupon_terakhir || o.kuponTerakhir;
+    const kuponBerikut = o.kupon_berikut || o.kuponBerikut;
+    const settlement = o.settlement;
+    const salesPic = o.sales_pic || o.salesPic || '—';
+    const tglOrder = o.tanggal_order || o.tanggalOrder;
+    const createdBy = o.created_by || o.createdBy || '—';
+    const kupon = o.kupon;
+
     document.getElementById('detailContent').innerHTML = `
       <div style="margin-bottom:14px;">${jenisBadge}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        ${di('Nasabah', o.customerName)} ${di('Seri Obligasi', o.seri, true)}
-        ${di('ISIN Code', o.isinCode, true)} ${di('Jenis Obligasi', o.jenisObligasi)}
-        ${di('Mata Uang', o.mataUang)} ${di('Rating', o.rating||'-')}
-        ${di('Harga Beli', o.hargaBeli, true)} ${di('Harga Jual', o.hargaJual, true)}
-        ${o.jenisTransaksi==='Beli' ? di('Harga Beli Sales', o.hargaBeliSales, true) : di('Harga Jual Sales', o.hargaJualSales, true)}
-        ${di('YTM (%)', o.ytm, true)}
-        ${di('Face Amount', fmtRp(o.faceAmount))} ${di('Unit Amount', o.unitAmount)}
-        ${di('Deal Amount', fmtRp(o.dealAmount))} ${di('Harga Awal Beli', o.hargaAwalBeli||'—', true)}
-        ${di('Harga Order', o.harga||'—', true)} ${di('Sekuritas', o.sekuritasDipakai)}
-        ${di('Jatuh Tempo', fmtDate(o.jatuhTempo))} ${di('Kupon Terakhir', fmtDate(o.kuponTerakhir))}
-        ${di('Kupon Berikut', fmtDate(o.kuponBerikut))} ${di('Settlement', fmtDate(o.settlement))}
-        ${di('Sales PIC', o.salesPic)} ${di('Tgl Order', fmtDate(o.tanggalOrder))}
+        ${di('Nasabah', nasabah)} ${di('Client ID', clientId, true)}
+        ${di('Seri Obligasi', seri, true)} ${di('Jenis Obligasi', jenisObl)}
+        ${di('Mata Uang', mataUang)} ${di('Rating', rating)}
+        ${di('Kupon (%)', kupon != null ? Number(kupon).toFixed(3) + '%' : '—')}
+        ${di('YTM (%)', ytm != null ? Number(ytm).toFixed(4) + '%' : '—')}
+        ${di('Harga Beli', hargaBeli != null ? Number(hargaBeli).toFixed(2).replace('.',',') : '—')}
+        ${di('Harga Jual', hargaJual != null ? Number(hargaJual).toFixed(2).replace('.',',') : '—')}
+        ${di('Face Amount', fmtRp(faceAmount))} ${di('Unit', unitAmount ? unitAmount.toLocaleString('id-ID') : '—')}
+        ${di('Sekuritas', sekuritas)} ${di('Jatuh Tempo', fmtDate(jatuhTempo))}
+        ${di('Kupon Terakhir', fmtDate(kuponTerakhir))} ${di('Kupon Berikut', fmtDate(kuponBerikut))}
+        ${di('Settlement', fmtDate(settlement))} ${di('Sales PIC', salesPic)}
+        ${di('Tgl Order', fmtDate(tglOrder))} ${di('Diinput oleh', createdBy)}
         <div><div style="font-size:.62rem;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">Status</div><div style="font-weight:700;color:${statusColor};">${statusLabel}</div></div>
-        ${di('Diinput oleh', o.createdBy||o.updatedBy)}
+        ${o.rejected_reason ? di('Alasan Ditolak', o.rejected_reason) : ''}
         ${o.catatan ? `<div style="grid-column:1/-1;"><div style="font-size:.62rem;color:#aaa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Catatan</div><div style="font-size:.85rem;color:#555;background:#f8f8fb;border-radius:8px;padding:10px 14px;">${esc(o.catatan)}</div></div>` : ''}
       </div>`;
 
-    document.getElementById('detailEditBtn').onclick = () => {
-      document.getElementById('detailModal').classList.remove('open');
-      openEditModal(id);
-    };
-    document.getElementById('detailEditBtn').style.display = canManage() ? 'inline-flex' : 'none';
+    // Hide edit button - no editing allowed
+    const editBtn = document.getElementById('detailEditBtn');
+    if (editBtn) editBtn.style.display = 'none';
     document.getElementById('detailModal').classList.add('open');
   }
 
