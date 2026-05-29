@@ -478,7 +478,7 @@
     const cmtDiv = document.createElement('div');
     cmtDiv.className = 'rec-card-comment';
     const savedCmt = item.comment || '';
-    const savedBy = item.commentBy ? `Diedit oleh ${item.commentBy}` : '';
+    const savedBy = (item.comment_by || item.commentBy) ? `Diedit oleh ${item.comment_by || item.commentBy}` : '';
     cmtDiv.innerHTML = `
       <div class="cmt-label">Komentar Analis</div>
       <textarea id="rcmt-${item.id}" placeholder="Tambahkan komentar rekomendasi..." ${canEdit?'':'disabled'}
@@ -513,19 +513,19 @@
         </div>
         <div>
           <div class="rc-stat-label">Harga Jual</div>
-          <div class="rc-stat-value jual">${fmtHarga(item.hargaJual, !isUsd)}</div>
+          <div class="rc-stat-value jual">${fmtHarga(item.harga_jual||item.hargaJual, !isUsd)}</div>
         </div>
         <div>
           <div class="rc-stat-label">Harga Beli</div>
-          <div class="rc-stat-value beli">${fmtHarga(item.hargaBeli, !isUsd)}</div>
+          <div class="rc-stat-value beli">${fmtHarga(item.harga_beli||item.hargaBeli, !isUsd)}</div>
         </div>
         <div>
           <div class="rc-stat-label">Jatuh Tempo</div>
-          <div class="rc-stat-value" style="font-size:.8rem;">${fmtDate(item.jatuhTempo)}</div>
+          <div class="rc-stat-value" style="font-size:.8rem;">${fmtDate(item.jatuh_tempo||item.jatuhTempo)}</div>
         </div>
       </div>
       <div class="rec-card-footer">
-        <div class="rc-tgl">Update: ${fmtDate(item.tanggalUpdate)}</div>
+        <div class="rc-tgl">Update: ${fmtDate(item.tanggal_update||item.tanggalUpdate)}</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <button class="btn btn-sm btn-order" onclick="event.stopPropagation();goOrder('${esc(item.seri||'')}','${esc(item.category||'')}')">🛒 Order</button>
           ${canManageRec() ? `<button class="btn-rc-remove" onclick="removeRecommendation('${item.id}')">× Hapus</button>` : ''}
@@ -552,7 +552,7 @@
     const val = ta.value.trim();
     btn.textContent = 'Menyimpan...'; btn.disabled = true;
     try {
-      const { error } = await window._supabase.from(COL_REC).update({ comment: val, commentBy: curUser?.name||'', commentAt: new Date().toISOString() }).eq('id', id);
+      const { error } = await window._supabase.from('bb_recommendations').update({ comment: val, comment_by: curUser?.name||'', comment_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
       const rec = recItems.find(r => r.id === id);
       if (rec) { rec.comment = val; rec.commentBy = curUser?.name||''; }
@@ -565,7 +565,7 @@
 
   // ===== OTHER OBLIGASI TABLE =====
   function renderOtherTable() {
-    const recIds = new Set(recItems.map(r => r.psId || r.id));
+    const recIds = new Set(recItems.map(r => r.ps_id || r.psId || r.id));
     const canEdit = canManageRec();
     let allItems = [];
     CATEGORIES.forEach(cat => {
@@ -586,18 +586,18 @@
       const catShort = CAT_SHORT[item.category] || item.category;
       const isGov = item.category.startsWith('gov');
       const badgeCls = isUsd ? 'badge-usd' : (isGov ? 'badge-idr' : 'badge-idr');
-      const cmt = item.otherComment || '';
-      const cmtBy = item.otherCommentBy ? `Diedit oleh ${item.otherCommentBy}` : '';
+      const cmt = item.other_comment || item.otherComment || '';
+      const cmtBy = (item.other_comment_by || item.otherCommentBy) ? `Diedit oleh ${item.other_comment_by || item.otherCommentBy}` : '';
       return `
         <tr class="main-row" id="otr-${idx}" onclick="toggleOtherRow(${idx})">
           <td><div class="ot-seri">${esc(item.seri||'—')}</div><div class="ot-issuer">${esc(CAT_LABEL[item.category]||'')}</div></td>
           <td><span class="${badgeCls}">${catShort}</span></td>
           <td>${item.kupon!=null?Number(item.kupon).toFixed(3)+'%':'—'}</td>
           <td class="ot-yield">${item.yield!=null?Number(item.yield).toFixed(4)+'%':'—'}</td>
-          <td class="ot-price-jual">${fmtHarga(item.hargaJual,!isUsd)}</td>
-          <td class="ot-price-beli">${fmtHarga(item.hargaBeli,!isUsd)}</td>
-          <td style="font-size:.8rem;color:var(--gray)">${fmtDate(item.jatuhTempo)}</td>
-          <td style="font-size:.75rem;color:#bbb">${fmtDate(item.tanggalUpdate)}</td>
+          <td class="ot-price-jual">${fmtHarga(item.harga_jual||item.hargaJual,!isUsd)}</td>
+          <td class="ot-price-beli">${fmtHarga(item.harga_beli||item.hargaBeli,!isUsd)}</td>
+          <td style="font-size:.8rem;color:var(--gray)">${fmtDate(item.jatuh_tempo||item.jatuhTempo)}</td>
+          <td style="font-size:.75rem;color:#bbb">${fmtDate(item.tanggal_update||item.tanggalUpdate)}</td>
           <td onclick="event.stopPropagation()">
             <button class="btn btn-sm btn-order" onclick="goOrder('${esc(item.seri||'')}','${esc(item.category||'')}')">🛒 Order</button>
           </td>
@@ -642,12 +642,11 @@
     const val = ta.value.trim();
     btn.textContent = 'Menyimpan...'; btn.disabled = true;
     try {
-      const colName = COL_PS[cat];
-      const { error } = await window._supabase.from(colName).update({ otherComment: val, otherCommentBy: curUser?.name||'' }).eq('id', itemId);
+      const { error } = await window._supabase.from('obligasi_products').update({ other_comment: val, other_comment_by: curUser?.name||'' }).eq('id', itemId);
       if (error) throw error;
       const arr = psData[cat];
       const found = arr && arr.find(r => r.id === itemId);
-      if (found) { found.otherComment = val; found.otherCommentBy = curUser?.name||''; }
+      if (found) { found.other_comment = val; found.other_comment_by = curUser?.name||''; }
       byEl.textContent = `Diedit oleh ${curUser?.name||''}`;
       btn.style.display = 'none';
       showToast('Komentar tersimpan', 'success');
@@ -693,6 +692,8 @@
       const isUsd = item.category.endsWith('usd');
       const alreadyAdded = existingIds.has(item.id);
       const isSelected = pickerSelected && pickerSelected.id === item.id;
+      const hargaJual = item.harga_jual || item.hargaJual;
+      const jatuhTempo = item.jatuh_tempo || item.jatuhTempo;
       return `<div class="picker-item${isSelected?' selected':''}${alreadyAdded?' already':''}"
         data-id="${item.id}" data-cat="${item.category}"
         style="${alreadyAdded?'opacity:.4;cursor:not-allowed;':''}"
@@ -700,9 +701,9 @@
         <div class="pi-seri">${esc(item.seri||'')}</div>
         <div class="pi-info">
           <span class="pi-stat"><strong>${item.kupon!=null?Number(item.kupon).toFixed(3)+'%':'—'}</strong> Kupon</span>
-          <span class="pi-stat"><strong>${fmtHarga(item.hargaJual,!isUsd)}</strong> Jual</span>
+          <span class="pi-stat"><strong>${fmtHarga(hargaJual,!isUsd)}</strong> Jual</span>
           <span class="pi-stat"><strong>${item.yield!=null?Number(item.yield).toFixed(4)+'%':'—'}</strong> Yield</span>
-          <span class="pi-stat">${fmtDate(item.jatuhTempo)}</span>
+          <span class="pi-stat">${fmtDate(jatuhTempo)}</span>
         </div>
         <span class="picker-type ${isUsd?'badge-usd':'badge-idr'}">${CAT_SHORT[item.category]}</span>
         <div class="pi-check">${isSelected?'✓':alreadyAdded?'✓':''}</div>
@@ -728,22 +729,33 @@
     const btn = document.getElementById('pickerConfirmBtn');
     btn.textContent = 'Menambahkan...'; btn.disabled = true;
     try {
-      const recData = { ...pickerSelected, psId: pickerSelected.id, addedBy: curUser?.name||'', addedAt: new Date().toISOString() };
-      delete recData.id;
-      const { data: newRow, error } = await window._supabase.from(COL_REC).insert(recData).select().single();
+      const s = pickerSelected;
+      const recData = {
+        ps_id: s.id,
+        category: s.category,
+        seri: s.seri,
+        kupon: s.kupon,
+        jatuh_tempo: s.jatuh_tempo || s.jatuhTempo || null,
+        harga_jual: s.harga_jual || s.hargaJual || null,
+        harga_beli: s.harga_beli || s.hargaBeli || null,
+        yield: s.yield || null,
+        added_by: curUser?.name || '',
+        added_at: new Date().toISOString(),
+      };
+      const { data: newRow, error } = await window._supabase.from('bb_recommendations').insert(recData).select().single();
       if (error) throw error;
       recItems.push(newRow);
       renderRecCards();
       closeModal('pickerModal');
-      showToast(`${pickerSelected.seri} ditambahkan sebagai rekomendasi`, 'success');
-    } catch(e) { console.error(e); showToast('Gagal menambahkan rekomendasi', 'error'); }
+      showToast(`${s.seri} ditambahkan sebagai rekomendasi`, 'success');
+    } catch(e) { console.error(e); showToast('Gagal menambahkan rekomendasi: ' + (e.message||''), 'error'); }
     finally { btn.textContent = 'Tambahkan Rekomendasi'; btn.disabled = false; }
   }
 
   async function removeRecommendation(id) {
     if (!confirm('Hapus dari rekomendasi?')) return;
     try {
-      const { error } = await window._supabase.from(COL_REC).delete().eq('id', id);
+      const { error } = await window._supabase.from('bb_recommendations').delete().eq('id', id);
       if (error) throw error;
       recItems = recItems.filter(r => r.id !== id);
       renderRecCards();
