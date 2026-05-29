@@ -959,15 +959,27 @@
 
     try {
       const ob = orderObligasi;
+      const cat = document.getElementById('ordCategory').value;
+      const isUsd = cat.endsWith('usd');
+      const isKorp = cat.startsWith('korp');
+      const isGov = cat.startsWith('gov');
+
       const orderData = {
         jenis_transaksi: 'Beli',
-        category: document.getElementById('ordCategory').value,
+        category: cat,
         seri: ob.seri,
+        mata_uang: isUsd ? 'USD' : 'IDR',
+        jenis_obligasi: isKorp ? 'Korporasi' : (isGov ? 'Pemerintah' : ''),
+        rating: ob.rating || '-',
         kupon: ob.kupon,
-        jatuh_tempo: ob.jatuh_tempo || ob.jatuhTempo,
-        harga_beli: ob.harga_beli || ob.hargaBeli,
-        harga_jual: ob.harga_jual || ob.hargaJual,
-        ytm: ob.yield,
+        jatuh_tempo: ob.jatuh_tempo || ob.jatuhTempo || null,
+        kupon_terakhir: ob.last_coupon_date || ob.lastCouponDate || null,
+        kupon_berikut: nextCoupon || null,
+        harga_beli: ob.harga_beli || ob.hargaBeli || null,
+        harga_jual: ob.harga_jual || ob.hargaJual || null,
+        harga_beli_sales: ob.harga_beli || ob.hargaBeli || null,
+        harga_jual_sales: ob.harga_jual || ob.hargaJual || null,
+        ytm: ob.yield || null,
         client_id: clientId,
         customer_name: clientName,
         sekuritas_dipakai: sekuritas,
@@ -976,7 +988,6 @@
         face_amount: amount,
         deal_amount: amount,
         settlement: settlement,
-        kupon_berikut: nextCoupon,
         tanggal_order: new Date().toISOString().slice(0, 10),
         sales_pic: curUser?.name || '',
         sales_code: curUser?.username || '',
